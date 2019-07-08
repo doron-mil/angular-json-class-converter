@@ -17,6 +17,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "angular-json-class-converter": [
+        "dist/angular-json-class-converter"
+      ],
+      "angular-json-class-converter/*": [
+        "dist/angular-json-class-converter/*"
+      ]
+    }
   }
 }
