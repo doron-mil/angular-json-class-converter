@@ -1,5 +1,4 @@
 import {ModuleWithProviders, NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {
   AngularJsonClassConverterService,
   JsonConverterConfig,
@@ -7,9 +6,7 @@ import {
 } from './angular-json-class-converter.service';
 
 @NgModule({
-  imports: [
-    CommonModule
-  ],
+  imports: [  ],
   declarations: []
 })
 export class AngularJsonClassConverterModule {

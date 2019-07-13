@@ -1,0 +1,10 @@
+.header-class {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  text-align: center;
+}
+
+.tr-class td{
+  border-bottom: blue 1px dashed;
+}

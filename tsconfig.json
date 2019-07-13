@@ -11,8 +11,10 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es5",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "typeRoots": [
-      "node_modules/@types"
+      "node_modules/@types","src/typings.d.ts"
     ],
     "lib": [
       "es2018",

@@ -24,14 +24,15 @@ Add to the imports section
 Where jsonConverterConfig is an object containing :
     
     const jsonConverterConfig = {
-      configurationFilePath: <Path to the JSON configuration file>,
+      conversionSchema: <Conversion Schema object>,
       classesMapArray: <Map of classes>,
       conversionFunctionsMapArray: <Map of functions >
     };
 
-#### JSON configuration
+#### Conversion Schema object
 
-JSON containing array of conversions receipt, each for class.
+An object that implements an array of ClassConversionSchemaInterface.
+Each item in the array represent a class.
 
 Each conversion receipt consists of:
 
@@ -119,7 +120,7 @@ If needed to convert to json, use (myClassInstance can be an object or array of 
 
     
 ## Further help
-It was developed for my own needs and I didn't payed much effort in testing and planning.
+It was developed for my own needs .
 I made it, because haven't found something similar.
 I will see with time goes ,if there is interest and requests regarding this module, I will enhance this module
 accordingly. 

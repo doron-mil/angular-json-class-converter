@@ -1,12 +1,20 @@
 {
   "name": "angular-json-class-converter",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Angular module to serialize and deserialize JS/TS objects to JSON. ",
-  "keywords" :["Angular","Library","JSON","serialize","deserialize","GSON","class"],
-  "license" : "SEE LICENSE IN LICENSE",
+  "keywords": [
+    "Angular",
+    "Library",
+    "JSON",
+    "serialize",
+    "deserialize",
+    "GSON",
+    "class"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/doron-mil/angular-json-class-converter"
+    "type": "git",
+    "url": "https://github.com/doron-mil/angular-json-class-converter"
   },
   "scripts": {
     "ng": "ng",
@@ -33,6 +41,7 @@
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
     "core-js": "^2.5.4",
+    "moment": "^2.24.0",
     "rxjs": "~6.3.3",
     "tslib": "^1.9.0",
     "zone.js": "~0.8.26"

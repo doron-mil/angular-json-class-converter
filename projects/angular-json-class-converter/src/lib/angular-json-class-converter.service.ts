@@ -1,5 +1,4 @@
 import {Inject, Injectable, InjectionToken} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 
 export const JsonConverterConfig = new InjectionToken<JsonConverterConfigurationInterface>('JsonConverterConfig');
 
@@ -11,7 +10,7 @@ function getClassNameOutOfObject(classedObject: [(any | any[])], classesMap: Map
   let entry = entries.next();
   while (!entry.done) {
     if (entry.value[1] === objConstructor) {
-      foundClassName = entry.value[0]
+      foundClassName = entry.value[0];
       break;
     }
     entry = entries.next();
@@ -25,9 +24,8 @@ function getClassNameOutOfObject(classedObject: [(any | any[])], classesMap: Map
 })
 export class AngularJsonClassConverterService {
 
-  conversionSchemaFileName: string;
-  conversionMap: { [key: string]: ConversionSchema; } = {};
-  conversionFunctionsMap: Map<string, ((any?) => any)> = new Map<string, ((any?) => any)>();
+  conversionMap: Map<string, ClassConversionSchema> = new Map<string, ClassConversionSchema>();
+  conversionFunctionsMap: Map<string, ((param?: any) => any)> = new Map<string, ((param?: any) => any)>();
   // The classMap is intended only for a typed conversion - we don't have the clazz - so to retrieve it...
   classesMap: Map<string, { new() }> = new Map<string, { new() }>();
 
@@ -41,31 +39,35 @@ export class AngularJsonClassConverterService {
     }
   }
 
+  static isNotNull(aObject) {
+    return aObject != null && aObject !== null && typeof aObject !== 'undefined';
+  }
+
   constructor(
-    @Inject(JsonConverterConfig) private aConversionSchemaFileName: JsonConverterConfigurationInterface,
-    private http: HttpClient
-  ) {
+    @Inject(JsonConverterConfig) private aConverterConfiguration: JsonConverterConfigurationInterface) {
 
-    this.conversionSchemaFileName = aConversionSchemaFileName.configurationFilePath;
-
-    if (aConversionSchemaFileName.conversionFunctionsMapArray) {
-      aConversionSchemaFileName.conversionFunctionsMapArray.forEach(
+    if (aConverterConfiguration.conversionFunctionsMapArray) {
+      aConverterConfiguration.conversionFunctionsMapArray.forEach(
         (methodMapEntry: MethodMapEntry) => {
           this.conversionFunctionsMap.set(methodMapEntry.methodName, methodMapEntry.method);
         });
     }
-    this.classesMap.set('ConversionSchema', ConversionSchema);
-    if (aConversionSchemaFileName.classesMapArray) {
-      aConversionSchemaFileName.classesMapArray.forEach(
+    this.classesMap.set('ClassConversionSchema', ClassConversionSchema);
+    if (aConverterConfiguration.classesMapArray) {
+      aConverterConfiguration.classesMapArray.forEach(
         (classMapEntry: ClassMapEntry) => {
           this.classesMap.set(classMapEntry.className, classMapEntry.clazz);
         });
     }
 
-    this.http.get(this.conversionSchemaFileName)
-      .subscribe(schema => {
-        this.buildConversionsArray(schema);
-      });
+    if (aConverterConfiguration.conversionSchema) {
+      this.buildConversionsArray(aConverterConfiguration.conversionSchema);
+    }
+  }
+
+  convertDualRetType<T>(simpleObj: any, className: string): Array<T> | T {
+    const retValue = this.convert<T>(simpleObj, className);
+    return AngularJsonClassConverterService.isArray(simpleObj) ? retValue : retValue[0];
   }
 
   convert<T>(simpleObj: any, className: string): Array<T> {
@@ -77,9 +79,7 @@ export class AngularJsonClassConverterService {
         retObjectClassArray.push(schemaItem);
       });
     } else {
-      (simpleObj as Array<any>).forEach(simpleObjItem => {
-        retObjectClassArray.push(this.convertOneObject(simpleObjItem, className));
-      });
+      retObjectClassArray.push(this.convertOneObject(simpleObj, className));
     }
 
     return retObjectClassArray;
@@ -94,24 +94,22 @@ export class AngularJsonClassConverterService {
     }
     const retObjectClass = new objConstructor();
 
-    let conversionSchema = this.conversionMap[className];
-
-    if (!conversionSchema) {
-      conversionSchema = this.generateDefaultConversionSchema();
+    let classConversionSchema = this.conversionMap.get(className);
+    if (!classConversionSchema) {
+      classConversionSchema = this.generateDefaultConversionSchema();
     }
 
-    if (conversionSchema.iterateAllProperties) {
+    if (classConversionSchema.iterateAllProperties) {
       Object.keys(retObjectClass).forEach((key) => {
         const propertyValue = simpleObj[key];
-        if (propertyValue != null && propertyValue !== null &&
-          typeof propertyValue !== 'undefined') {
+        if (AngularJsonClassConverterService.isNotNull(propertyValue)) {
           retObjectClass[key] = propertyValue;
         }
       });
     }
 
-    if (conversionSchema.hasSpecificConversions()) {
-      conversionSchema.propertyConversionArray.forEach(
+    if (classConversionSchema.hasSpecificConversions()) {
+      classConversionSchema.propertyConversionArray.forEach(
         (propertyConversion: PropertyConversion) => {
           const propertyName = propertyConversion.propertyName;
           let jsonPropertyName = propertyConversion.propertyNameInJson;
@@ -119,12 +117,10 @@ export class AngularJsonClassConverterService {
             jsonPropertyName = propertyName;
           }
           const jsonPropertyValue = this.getJsonPropertyValue(simpleObj, jsonPropertyName);
-          if (jsonPropertyValue != null && jsonPropertyValue !== null &&
-            typeof jsonPropertyValue !== 'undefined') {
+          if (AngularJsonClassConverterService.isNotNull(jsonPropertyValue)) {
             // If there is a typed conversion
             if (propertyConversion.type) {
-              retObjectClass[propertyName] = this.convert(jsonPropertyValue, propertyConversion.type);
-
+              retObjectClass[propertyName] = this.convertDualRetType(jsonPropertyValue, propertyConversion.type);
               // If there is a conversion function to be used
             } else if (propertyConversion.conversionFunctionName && this.conversionFunctionsMap) {
               const conversionFunction =
@@ -147,7 +143,7 @@ export class AngularJsonClassConverterService {
 
   convertToJson(classedObject: [any | any[]]): any | Array<any> {
     const className = getClassNameOutOfObject(classedObject, this.classesMap);
-    const conversionSchema = this.conversionMap[className];
+    const conversionSchema = this.conversionMap.get(className);
 
     let retJsonObjectArray = new Array<any>();
     let classedObjectsArray: Array<any>;
@@ -156,7 +152,7 @@ export class AngularJsonClassConverterService {
     if (conversionSchema && conversionSchema.hasSpecificConversions()) {
       if (AngularJsonClassConverterService.isArray(classedObject)) {
         isArray = true;
-        classedObjectsArray = <Array<any>>classedObject;
+        classedObjectsArray = classedObject as Array<any>;
       } else {
         classedObjectsArray = new Array<any>(classedObject);
       }
@@ -169,11 +165,10 @@ export class AngularJsonClassConverterService {
       isArray = true;
       retJsonObjectArray = classedObject;
     }
-
     return isArray ? retJsonObjectArray : (retJsonObjectArray.length > 0 ? retJsonObjectArray[0] : undefined);
   }
 
-  private convertToJsonOneObject(classedObjectItem: any, conversionSchema: ConversionSchema) {
+  private convertToJsonOneObject(classedObjectItem: any, conversionSchema: ClassConversionSchema) {
     const retObject = {};
 
     conversionSchema.propertyConversionArray.forEach(
@@ -184,28 +179,33 @@ export class AngularJsonClassConverterService {
           jsonPropertyName = propertyName;
         }
         const classedObjectValue = classedObjectItem[propertyName];
-        let convertedValue = classedObjectValue;
-        if (propertyConversion.conversionFunctionToJsonName && this.conversionFunctionsMap) {
-          const conversionFunction =
-            this.conversionFunctionsMap.get(propertyConversion.conversionFunctionToJsonName);
-          convertedValue = conversionFunction(classedObjectValue);
+        if (AngularJsonClassConverterService.isNotNull(classedObjectValue)) {
+          let convertedValue = classedObjectValue;
+          if (propertyConversion.conversionFunctionToJsonName && this.conversionFunctionsMap) {
+            const conversionFunction =
+              this.conversionFunctionsMap.get(propertyConversion.conversionFunctionToJsonName);
+            convertedValue = conversionFunction(classedObjectValue);
+          } else if (propertyConversion.type) {
+            convertedValue = this.convertToJson(classedObjectValue);
+          }
+          this.setJsonPropertyValue(retObject, jsonPropertyName, convertedValue);
         }
-        this.setJsonPropertyValue(retObject, jsonPropertyName, convertedValue);
       });
 
     return retObject;
   }
 
   private generateDefaultConversionSchema() {
-    const conversionSchema = new ConversionSchema();
+    const conversionSchema = new ClassConversionSchema();
     conversionSchema.iterateAllProperties = true;
     return conversionSchema;
   }
 
-  private buildConversionsArray(schema: any) {
-    const conversionSchemasArray = this.convert<ConversionSchema>(schema, 'ConversionSchema');
-    conversionSchemasArray.forEach(conversionSchemas => {
-      this.conversionMap[conversionSchemas.className] = conversionSchemas;
+  private buildConversionsArray(aClassConversionJsonSchemasArray: ClassConversionSchemaInterface[]) {
+    const conversionSchemasArray =
+      this.convert<ClassConversionSchema>(aClassConversionJsonSchemasArray, 'ClassConversionSchema');
+    conversionSchemasArray.forEach(aClassConversionSchemas => {
+      this.conversionMap.set(aClassConversionSchemas.className, aClassConversionSchemas);
     });
   }
 
@@ -239,7 +239,7 @@ export class AngularJsonClassConverterService {
   }
 }
 
-class PropertyConversion {
+export interface PropertyConversion {
   propertyName: string;
   type?: string;
   propertyNameInJson?: string;
@@ -247,12 +247,19 @@ class PropertyConversion {
   conversionFunctionToJsonName?: string;
 }
 
-class ConversionSchema {
+export interface ClassConversionSchemaInterface {
   className: string;
-  iterateAllProperties: boolean = false;
   propertyConversionArray: PropertyConversion[];
+  iterateAllProperties?: boolean;
+}
+
+class ClassConversionSchema implements ClassConversionSchemaInterface {
+  className: string;
+  propertyConversionArray: PropertyConversion[];
+  iterateAllProperties: boolean;
 
   constructor() {
+    this.iterateAllProperties = false;
     this.className = undefined;
     this.propertyConversionArray = undefined;
   }
@@ -264,7 +271,7 @@ class ConversionSchema {
 
 export interface MethodMapEntry {
   methodName: string;
-  method: (any?) => any;
+  method: (param?: any) => any;
 }
 
 export interface ClassMapEntry {
@@ -273,7 +280,7 @@ export interface ClassMapEntry {
 }
 
 export interface JsonConverterConfigurationInterface {
-  configurationFilePath?: string;
+  conversionSchema?: ClassConversionSchemaInterface[];
   conversionFunctionsMapArray?: MethodMapEntry[];
   classesMapArray?: ClassMapEntry[];
 }
