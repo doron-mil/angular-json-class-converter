@@ -61,13 +61,11 @@ export class AppComponent implements OnInit {
         return previousValue.set(Number(currentValue.id), currentValue);
       }, new Map<number, any>());
 
-    console.log('00000', mockDataArray);
     convertedClassTypeArray.forEach(classInst => {
       const originalJsonItem = jsonMap.get(classInst.id);
       const convertedJsonItem = jsonMap.get(classInst.id);
 
       const conversionItem = ConversionItem.createInstance(originalJsonItem, classInst, convertedJsonItem);
-      console.log('1111', classInst);
 
       this.conversionItemsArray.push(conversionItem);
     });

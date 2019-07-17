@@ -1,8 +1,7 @@
 import {ModuleWithProviders, NgModule} from '@angular/core';
+import {JsonConverterConfigurationInterface} from 'json-class-converter';
 import {
-  AngularJsonClassConverterService,
-  JsonConverterConfig,
-  JsonConverterConfigurationInterface
+  AngularJsonClassConverterService, JsonConverterConfig
 } from './angular-json-class-converter.service';
 
 @NgModule({

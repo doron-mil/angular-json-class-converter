@@ -1,6 +1,6 @@
 {
   "name": "angular-json-class-converter",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Angular module to serialize and deserialize JS/TS objects to JSON. ",
   "keywords": [
     "Angular",
@@ -41,6 +41,7 @@
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
     "core-js": "^2.5.4",
+    "json-class-converter": "^1.0.1",
     "moment": "^2.24.0",
     "rxjs": "~6.3.3",
     "tslib": "^1.9.0",

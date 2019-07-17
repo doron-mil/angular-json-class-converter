@@ -1,20 +1,19 @@
 import moment from 'moment';
 import {TestBed} from '@angular/core/testing';
 
-import {AngularJsonClassConverterModule} from '../lib/angular-json-class-converter.module';
+import {JsonConverterConfigurationInterface} from 'json-class-converter';
 
-import {
-  AngularJsonClassConverterService,
-  JsonConverterConfigurationInterface
-} from '../lib/angular-json-class-converter.service';
+import {AngularJsonClassConverterModule} from '../lib/angular-json-class-converter.module';
+import {AngularJsonClassConverterService} from '../lib/angular-json-class-converter.service';
+
+import {ClassA} from './model/classA';
 
 import jsonConvConfigUtil from './data/jsonConvConfigUtil';
 import localConversionSchema from './data/conversion-schema.json';
-import {ClassA} from './model/classA';
 
 import classAData from './data/mock-json-data.json';
 
-  const jsonConverterConfig: JsonConverterConfigurationInterface = {
+const jsonConverterConfig: JsonConverterConfigurationInterface = {
   conversionSchema: localConversionSchema,
   conversionFunctionsMapArray: jsonConvConfigUtil.functionsMapArray,
   classesMapArray: jsonConvConfigUtil.classesMapArray

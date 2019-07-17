@@ -1,7 +1,7 @@
 import moment from 'moment';
-import {ClassMapEntry, MethodMapEntry} from 'angular-json-class-converter';
 import {ClassA} from '../../model/classA';
 import {ClassB} from '../../model/classB';
+import {ClassMapEntry, MethodMapEntry} from 'json-class-converter';
 
 const dateFormat = 'D/M/Y';
 

@@ -10,7 +10,7 @@ The package is utility to help serialize/deserialize JSON objects into/from spec
 ## Installation
 
 
-    npm i --save angular-json-class-converter
+    npm i --save angular-json-class-converter json-class-converter
 
 
 ## Configurations
@@ -81,7 +81,7 @@ Example :
 This will hold all the functions that are needed for special conversion 
 ( If no function is specified, value will be copied as is)
 
-IIs an array of objects in the structure :
+Is an array of objects in the structure :
 
     {methodName: '<Name of Method>', method: <Method>}
     
@@ -112,7 +112,7 @@ When need to convert to class (one or array of objects) use :
     
 If needed only one object, use :
 
-    const convertedNweClass : MyClass = this.jsonConverterService.convertOneObject<MyClass>(exampleJsonObj, 'MyClass');
+    const convertedNewClass : MyClass = this.jsonConverterService.convertOneObject<MyClass>(exampleJsonObj, 'MyClass');
 
 If needed to convert to json, use (myClassInstance can be an object or array of objects):
 

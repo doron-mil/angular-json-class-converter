@@ -1,7 +1,8 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
-import {AngularJsonClassConverterModule, JsonConverterConfigurationInterface} from 'angular-json-class-converter';
+import {JsonConverterConfigurationInterface} from 'json-class-converter';
+import {AngularJsonClassConverterModule} from 'angular-json-class-converter';
 
 import {AppComponent} from './app.component';
 import jsonConvConfigUtil from './utils/json-converter-config/jsonConvConfigUtil';
