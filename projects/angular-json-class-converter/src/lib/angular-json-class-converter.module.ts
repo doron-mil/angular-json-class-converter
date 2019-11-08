@@ -4,19 +4,23 @@ import {
   AngularJsonClassConverterService, JsonConverterConfig
 } from './angular-json-class-converter.service';
 
+export interface IJsonConverterConfigFactory {
+  getConfig: () => JsonConverterConfigurationInterface;
+}
+
 @NgModule({
-  imports: [  ],
+  imports: [],
   declarations: []
 })
 export class AngularJsonClassConverterModule {
-  static forRoot(converterConfiguration: JsonConverterConfigurationInterface): ModuleWithProviders {
+  static forRoot(aConfigFactory: IJsonConverterConfigFactory): ModuleWithProviders {
     return {
       ngModule: AngularJsonClassConverterModule,
       providers: [
         AngularJsonClassConverterService,
         {
           provide: JsonConverterConfig,
-          useValue: converterConfiguration
+          useFactory: aConfigFactory.getConfig
         }
       ]
     };

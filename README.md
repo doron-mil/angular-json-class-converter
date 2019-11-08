@@ -21,13 +21,19 @@ Add to the imports section
 
     AngularJsonClassConverterModule.forRoot(jsonConverterConfig),
 
-Where jsonConverterConfig is an object containing :
+Where jsonConverterConfig is an object implementing IJsonConverterConfigFactory.
+It has to implement only getConfig function that must be exported.
+Like this:
     
-    const jsonConverterConfig = {
+    export function getConfig(): JsonConverterConfigurationInterface {
+      return {
       conversionSchema: <Conversion Schema object>,
       classesMapArray: <Map of classes>,
       conversionFunctionsMapArray: <Map of functions >
-    };
+      };
+    }
+
+    const jsonConverterConfig: IJsonConverterConfigFactory = {getConfig};
 
 #### Conversion Schema object
 

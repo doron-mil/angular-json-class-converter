@@ -2,18 +2,22 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
 import {JsonConverterConfigurationInterface} from 'json-class-converter';
-import {AngularJsonClassConverterModule} from 'angular-json-class-converter';
+import {AngularJsonClassConverterModule, IJsonConverterConfigFactory} from 'angular-json-class-converter';
 
 import {AppComponent} from './app.component';
 import jsonConvConfigUtil from './utils/json-converter-config/jsonConvConfigUtil';
 
 import localConversionSchema from '../assets/conversion-schema.json';
 
-const jsonConverterConfig: JsonConverterConfigurationInterface = {
-  conversionSchema: localConversionSchema,
-  conversionFunctionsMapArray: jsonConvConfigUtil.functionsMapArray,
-  classesMapArray: jsonConvConfigUtil.classesMapArray
-};
+export function getConfig(): JsonConverterConfigurationInterface {
+  return {
+    conversionSchema: localConversionSchema,
+    conversionFunctionsMapArray: jsonConvConfigUtil.functionsMapArray,
+    classesMapArray: jsonConvConfigUtil.classesMapArray
+  };
+}
+
+const jsonConverterConfig: IJsonConverterConfigFactory = {getConfig};
 
 @NgModule({
   declarations: [
